@@ -56,8 +56,8 @@ contract MasterChef is Ownable {
     }
     // The CHA TOKEN!
     ChaToken public cha;
-    // Dev address.
-    address public devaddr;
+    // Fund address.
+    address public fundaddr;
     // Block number when bonus CHA period ends.
     uint256 public bonusEndBlock;
     // CHA tokens created per block.
@@ -84,13 +84,13 @@ contract MasterChef is Ownable {
 
     constructor(
         ChaToken _cha,
-        address _devaddr,
+        address _fundaddr,
         uint256 _chaPerBlock,
         uint256 _startBlock,
         uint256 _bonusEndBlock
     ) public {
         cha = _cha;
-        devaddr = _devaddr;
+        fundaddr = _fundaddr;
         chaPerBlock = _chaPerBlock;
         bonusEndBlock = _bonusEndBlock;
         startBlock = _startBlock;
@@ -221,8 +221,7 @@ contract MasterChef is Ownable {
             multiplier.mul(chaPerBlock).mul(pool.allocPoint).div(
                 totalAllocPoint
             );
-        cha.mint(devaddr, chaReward.div(10));
-        cha.mint(address(this), chaReward);
+        cha.transferFrom(address(fundaddr), address(this), chaReward);
         pool.accChaPerShare = pool.accChaPerShare.add(
             chaReward.mul(1e12).div(lpSupply)
         );
@@ -286,11 +285,5 @@ contract MasterChef is Ownable {
         } else {
             cha.transfer(_to, _amount);
         }
-    }
-
-    // Update dev address by the previous dev.
-    function dev(address _devaddr) public {
-        require(msg.sender == devaddr, "dev: wut?");
-        devaddr = _devaddr;
     }
 }
